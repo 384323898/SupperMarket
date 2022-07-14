@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.user.UserMapper">
+    <select id="getUserByUserCode" resultType="User" parameterType="String">
+        select * from smbms_user where userCode=#{userCode}
+    </select>
+    <!-- 查询用户计录数-->
+    <select id="getUserCount" resultType="int" >
+        select count(1) as count from smbms_user u join smbms_role r on u.userRole = r.id
+        <where>
+            <if test="userName != null and userName != ''">
+                u.userName like CONCAT ('%',#{userName},'%')
+            </if>
+            <if test="userRole != null and userRole!=0">
+                and u.userRole = #{userRole}
+            </if>
+        </where>
+    </select>
+    <select id="getUserListByPage" resultMap="UserWithRoleName">
+        select u.*,r.* from smbms_user u join smbms_role r on u.userRole = r.id
+        <where>
+            <if test="userName != null and userName != ''">
+                and u.userName like CONCAT ('%',#{userName},'%')
+            </if>
+            <if test="userRole != null  and userRole!=0">
+                and u.userRole = #{userRole}
+            </if>
+        </where>
+        order by u.id  limit #{currentPageNo},#{pageSize}
+    </select>
+    <resultMap id="UserWithRoleName" type="User">
+        <id property="id" column="id" />
+        <association property="role" javaType="Role">
+            <id property="id" column="id" />
+        </association>
+    </resultMap>
+    <insert id="add" parameterType="User">
+        insert into smbms_user(userCode,userName
+        <if test="userPassword!=null and userPassword!=''">,userPassword</if>
+        <if test="gender!= null and gender!=0">,gender</if>
+        <if test="birthday!= null">,birthday</if>
+        <if test="phone!= null and phone!=''">,phone</if>
+        <if test="address!= null and address!=''">,address</if>
+        <if test="userRole!= null and userRole!=0">,userRole</if>
+        <if test="createdBy!= null and createdBy!=0">,createdBy</if>
+        <if test="creationDate!= null">,creationDate</if>
+        )
+        values(#{userCode},#{userName}<if test="userPassword!= null and userPassword!=''">,#{userPassword}</if>
+        <if test="gender!= null and gender!=0">,#{gender}</if>
+        <if test="birthday!= null">,#{birthday}</if>
+        <if test="phone!= null and phone!=''">,#{phone}</if>
+        <if test="address!= null and address!=''">,#{address}</if>
+        <if test="userRole!= null and userRole!=0">,#{userRole}</if>
+        <if test="createdBy!= null and createdBy!=0">,#{createdBy}</if>
+        <if test="creationDate!= null">,#{creationDate}</if>
+        )
+    </insert>
+    <!-- 根据ID获取用户数据 -->
+    <select id="getUserById" resultMap="UserWithRoleName" parameterType="int">
+		select  u.*,r.* from smbms_user u join smbms_role r on u.UserROle=r.id where u.id=#{id}
+	</select>
+
+    <!-- 修改数据 -->
+    <update id="modify" parameterType="User">
+        update smbms_user
+        <set>
+            <if test="userCode != null">userCode=#{userCode},</if>
+            <if test="userName != null">userName=#{userName},</if>
+            <if test="userPassword != null">userPassword=#{userPassword},</if>
+            <if test="gender != null">gender=#{gender},</if>
+            <if test="birthday != null">birthday=#{birthday},</if>
+            <if test="phone != null">phone=#{phone},</if>
+            <if test="address != null">address=#{address},</if>
+            <if test="userRole != null">userRole=#{userRole},</if>
+            <if test="modifyBy != null">modifyBy=#{modifyBy},</if>
+            <if test="modifyDate != null">modifyDate=#{modifyDate}</if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="deleteUserById" parameterType="int">
+		delete from smbms_user where id=#{id}
+	</delete>
+
+</mapper>
+
